@@ -27,23 +27,26 @@ jobs:
         python -m pip install --upgrade pip
         pip install schemachange
 
-    # Step 4: Run schemachange for migration
-    - name: Run schemachange
-      env:
-        SF_ACCOUNT: ${{ secrets.SF_ACCOUNT }}
-        SF_USER: ${{ secrets.SF_USER }}
-        SF_PASSWORD: ${{ secrets.SF_PASSWORD }}
-        SF_DATABASE: ${{ secrets.SF_DATABASE }}
-        SF_WAREHOUSE: ${{ secrets.SF_WAREHOUSE }}
-        SF_ROLE: ${{ secrets.SF_ROLE }}
+    # Step 4: Create connections.toml file
+    - name: Configure connections.toml
       run: |
-        schemachange \
-          --snowflake-account $SF_ACCOUNT \
-          --snowflake-user $SF_USER \
-          --snowflake-password $SF_PASSWORD \
-          --snowflake-role $SF_ROLE \
-          --snowflake-warehouse $SF_WAREHOUSE \
-          --snowflake-database $SF_DATABASE \
+        mkdir -p .config
+        cat > .config/connections.toml <<EOL
+        [default]
+        account = "${{ secrets.SF_ACCOUNT }}"
+        user = "${{ secrets.SF_USER }}"
+        password = "${{ secrets.SF_PASSWORD }}"
+        role = "${{ secrets.SF_ROLE }}"
+        warehouse = "${{ secrets.SF_WAREHOUSE }}"
+        database = "${{ secrets.SF_DATABASE }}"
+        schema = "${{ secrets.SF_SCHEMA }}"
+        EOL
+
+    # Step 5: Run schemachange
+    - name: Run schemachange
+      run: |
+        schemachange deploy \
+          --config-folder .config \
           --change-history-table CHANGE_HISTORY \
           --root-folder migrations \
           --verbose
