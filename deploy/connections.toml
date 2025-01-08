@@ -1,7 +1,0 @@
-[default]
-account = "ay38027.west-us-2.azure"
-user = "RANJIT_VARAKUTI"
-password = "Tirumala@123"
-role = "ACCOUNTADMIN"
-warehouse = "MHR_TEST01"
-database = "DB_TEST"
