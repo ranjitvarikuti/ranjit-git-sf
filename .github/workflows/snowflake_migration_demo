@@ -1,0 +1,44 @@
+name: snowflake_migration_demo
+
+# Controls when the action will run
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - deploy/**
+
+  workflow_dispatch: # Allows you to run this workflow manually from the Actions tab
+
+jobs:
+  deploy_snowflake_changes_job:
+    runs-on: ubuntu-latest
+
+    steps:
+    # Step 1: Checkout your repository under $GITHUB_WORKSPACE, so your job can access it
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    # Step 2: Use Python 3.8.x
+    - name: Use Python 3.8.x
+      uses: actions/setup-python@v2.2.1
+      with:
+        python-version: 3.8.x
+
+    # Step 3: Run schemachange
+    - name: Run schemachange
+      env:
+        SF_ACCOUNT: ${{ secrets.SF_ACCOUNT }}
+        SF_USERNAME: ${{ secrets.SF_USER }}
+        SF_ROLE: ${{ secrets.SF_ROLE }}
+        SF_WAREHOUSE: ${{ secrets.SF_WAREHOUSE }}
+        SF_DATABASE: ${{ secrets.SF_DATABASE }}
+        SF_SCHEMA: ${{ secrets.SF_SCHEMA }}
+        SNOWFLAKE_PASSWORD: ${{ secrets.SF_PASSWORD }}
+        GITHUB_WORKSPACE: ${{ github.workspace }}
+      run: |
+        echo "Step 1: Installing schemachange"
+        pip install schemachange
+
+        echo "Step 2: Running schemachange"
+        schemachange -a $SF_ACCOUNT -u $SF_USERNAME -r $SF_ROLE -w $SF_WAREHOUSE -d $SF_DATABASE -s $SF_SCHEMA -p $SNOWFLAKE_PASSWORD $GITHUB_WORKSPACE/deploy
